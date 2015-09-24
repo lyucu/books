@@ -1,10 +1,11 @@
 package lamb;
 
+import java.awt.Button;
 import java.util.Arrays;
 import java.util.Comparator;
 
 public class Demo {
-    public static void main(String args[]) {
+    public void prove() {
         // () -> {System.out.println("123");}
         String[] source = { "1", "22", "333", "4" };
         Arrays.sort(source, (fisrt, second) -> Integer.compare(fisrt.length(), second.length()));
@@ -15,5 +16,13 @@ public class Demo {
             return Integer.compare(first.length(), second.length());
         };
 
+        Button b = new Button();
+        b.addActionListener(event -> System.out.println("123"));
+
+        // 方法传递
+        b.addActionListener(System.out::println);
+        Arrays.sort(source, String::compareToIgnoreCase);
+
+        Thread t = new Thread(this::prove);
     }
 }
