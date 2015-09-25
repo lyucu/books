@@ -25,4 +25,12 @@ public class Demo {
 
         Thread t = new Thread(this::prove);
     }
+
+    // 变量的作用于
+    public void varContext(String arg1, int arg2) {
+        Runnable r = () -> {
+            for (int i = 0; i < arg2; i++)
+                System.out.println(arg1);
+        };
+    }
 }
