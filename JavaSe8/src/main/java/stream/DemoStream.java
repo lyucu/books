@@ -1,4 +1,4 @@
-package stream.test;
+package stream;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -6,11 +6,14 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class DemoStream {
@@ -111,6 +114,53 @@ public class DemoStream {
         Map<Integer, Integer> map = word.collect(Collectors.toMap(Integer::intValue, Function.identity()));
 
         word.collect(Collectors.toCollection(TreeSet::new));
+
+    }
+
+    public void run5() {
+        // 分类函数 可以对筛选后的流进一步进行处理
+        Stream<Locale> word = Stream.of(Locale.getAvailableLocales());
+        Map<String, List<Locale>> countryToLocales = word.collect(Collectors.groupingBy(Locale::getCountry));
+        // 分组转换
+        Map<String, Set<Locale>> setCOuntry = word
+                .collect(Collectors.groupingBy(Locale::getCountry, Collectors.toSet()));
+        // 分组统计
+        Map<String, Long> count = word.collect(Collectors.groupingBy(Locale::getCountry, Collectors.counting()));
+        // 分组计算
+        // Map<String, Integer> countPerple =
+        // word.collect(Collectors.groupingBy(City::getState,
+        // Collectors.summarizingInt(City::getPopulation)));
+
+        // maxby minby
+        // Map<String, City> stateLoLargetCity =
+        // word.collect(Collectors.groupingBy(City::getState,
+        // Collectors.maxBy(Comparator.comparing(CIty::getPopulicatio))));
+
+        // mapping方法处理结果
+        // Map<String, Optional<String>> stateToLongestCityName =
+        // word.collect(Collectors.groupingBy(City::getState,
+        // maping(City::getName, maxBy(Comparator.comparing(String::length);))))
+
+        // 当筛选结果为ｔｒｕｅ　or false 时　predicate 效率更高
+        Map<Boolean, List<Locale>> englistAndOtherLocales = word.collect(Collectors.partitioningBy(l -> l.getLanguage()
+                .equals("en")));
+    }
+
+    public void run6() {
+        // IntStream DoubleStream LongSream
+        IntStream stream = IntStream.of(1, 2, 3);
+        int[] array = { 1, 2, 3 };
+        stream = Arrays.stream(array, 0, 2);
+        // 自增长
+        IntStream zorToNinety = IntStream.range(0, 100);// 不包扩上限
+        zorToNinety = IntStream.rangeClosed(0, 100);// 包括上线
+
+        // 将原始类型流转化为对象流 使用　ｂｏｘ
+        Stream<Integer> integerStream = stream.boxed();
+
+        // 并行流 注意竞态条件
+        integerStream.parallel();
+
     }
 
     public void print(Optional source) {
