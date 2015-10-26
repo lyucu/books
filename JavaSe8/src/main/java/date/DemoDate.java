@@ -4,6 +4,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.Locale;
 
 import org.junit.Test;
 
@@ -30,7 +33,10 @@ public class DemoDate {
     @Test
     public void test3() {
         // 格式化日期与解析
-
+        TemporalAccessor tp = LocalTime.now();
+        DateTimeFormatter.ISO_DATE.format(tp);
+        DateTimeFormatter df = DateTimeFormatter.BASIC_ISO_DATE;
+        df.withLocale(Locale.FRANCE);
+        df = DateTimeFormatter.ofPattern("E yyyy-MM-dd HH:mm");
     }
-
 }
