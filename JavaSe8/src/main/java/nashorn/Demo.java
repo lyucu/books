@@ -5,6 +5,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -33,13 +34,35 @@ public class Demo {
         result = engine.eval(Files.newBufferedReader(Paths.get(url.getPath())));
         System.out.println(result);
 
+        // 传入参数
         url = getClass().getClassLoader().getResource("jsFile1.js");
+        Stage stage = new Stage();
+        stage.title = "123";
+        engine.put("stage", stage);
         result = engine.eval(Files.newBufferedReader(Paths.get(url.getPath())));
+        System.out.println(result);
+
+        url = getClass().getClassLoader().getResource("jsFile1.js");
+        stage = new Stage();
+        stage.title = "222";
+        Bindings scope = engine.createBindings();
+        scope.put("stage", stage);
+        result = engine.eval(Files.newBufferedReader(Paths.get(url.getPath())), scope);
         System.out.println(result);
 
     }
 
     @Test
-    public void test3() throws ScriptException {
+    // js调用java方法 创建JAVA对象 数组转换
+    public void test3() throws ScriptException, IOException {
+        ScriptEngineManager sm = new ScriptEngineManager();
+        ScriptEngine engine = sm.getEngineByName("nashorn");
+        URL url = getClass().getClassLoader().getResource("jsFile1.js");
+        Stage stage = new Stage();
+        stage.title = "123";
+        engine.put("stage", stage);
+        Object result = engine.eval(Files.newBufferedReader(Paths.get(url.getPath())));
+        System.out.println(result);
     }
+
 }
