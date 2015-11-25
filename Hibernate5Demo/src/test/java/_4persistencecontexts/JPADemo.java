@@ -1,9 +1,12 @@
-package persistencecontexts;
+package _4persistencecontexts;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceUnitUtil;
 
+import org.hibernate.Session;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,6 +77,35 @@ public class JPADemo {
         entityManager.flush();
         entityManager.close();
 
+    }
+
+    @Test
+    public void mergeDetachedEntity() {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        Auther a = new Auther();
+        a.setId(1l);
+        Auther b = entityManager.merge(a);
+        System.out.println(b.getName());
+
+    }
+
+    @Test
+    public void checkEntityPersistentStates() {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        Auther a = entityManager.find(Auther.class, 1l);
+
+        entityManager.contains(a);
+        PersistenceUnitUtil jpaUitl = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
+        System.out.println(jpaUitl.isLoaded(a));
+
+        entityManager.close();
+    }
+
+    @Test
+    public void accessHibernatefromJPA() {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        Session session = entityManager.unwrap(Session.class);
+        SessionImplementor sessionImplementor = entityManager.unwrap(SessionImplementor.class);
     }
 
     @Before

@@ -1,4 +1,4 @@
-package bootstrap;
+package _3bootstrap;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;

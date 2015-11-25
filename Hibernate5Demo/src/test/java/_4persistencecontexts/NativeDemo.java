@@ -1,5 +1,6 @@
-package persistencecontexts;
+package _4persistencecontexts;
 
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
@@ -92,6 +93,36 @@ public class NativeDemo {
             Auther b = session.byNaturalId(Auther.class).using("nId", 111l).load();
             session.flush();
             System.out.println(b.getnId());
+        }
+
+    }
+
+    @Test
+    public void mergeDetachedEntity() {
+        try (Session session = sessionFactory.openSession()) {
+            // can use .using().using().using().....
+            Auther a = new Auther();
+            a.setId(1l);
+            Auther b = (Auther) session.merge(a);
+            System.out.println(b.getName());
+        }
+
+    }
+
+    @Test
+    public void checkEntityPersistentStates() {
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            Auther a = session.byId(Auther.class).load(1l);
+            session.getTransaction().commit();
+            assert session.contains(a);
+
+            System.out.println(Hibernate.isInitialized(a));
+
+            Book book = new Book();
+            book.setAuther(session.byId(Auther.class).getReference(1l));
+
+            System.out.println(Hibernate.isInitialized(book.getAuther()));
         }
 
     }
