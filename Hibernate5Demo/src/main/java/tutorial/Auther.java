@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.NaturalId;
@@ -19,6 +20,9 @@ public class Auther {
     private Long id;
 
     private String name;
+
+    @Version
+    private Integer version;
 
     @NaturalId
     private Long nId;
