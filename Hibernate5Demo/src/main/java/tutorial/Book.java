@@ -7,12 +7,16 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.FetchProfile;
+import org.hibernate.annotations.FetchProfile.FetchOverride;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
 
 @Entity
 @Table(name = "Book")
 @Audited
+@FetchProfile(name = "book.auther", fetchOverrides = { @FetchOverride(entity = Book.class, association = "auther", mode = FetchMode.JOIN) })
 public class Book {
     @Id
     @GeneratedValue(generator = "increment")
