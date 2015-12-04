@@ -95,6 +95,40 @@ public class JPADemo {
         hql = "select case when c.name = c.nickName then null else c.name end from Customer c";
     }
 
+    @Test
+    public void Predicates() {
+        String hql;
+        hql = "select ... from Customer c where c.startDate < {d '2000-01-01'}";
+        hql = "select ... where type(p) = main";
+        // all or any or some
+        hql = "select ... where p.id > all(select spg.points from statsPerGame spg where spg.player = p)";
+        hql = "select .... where p is null";
+        hql = "select .... where p is not null";
+        hql = "select ... where p like '%123_'";
+        hql = "select ... where p between 0 and 9";
+        hql = "select ... where p in ('TX' , 'OK')";
+        hql = "select ... where p.list is empty";
+        hql = "select ... where p.list is not empty";
+        hql = "select ... where 'Hole' member of p.nickName";
+        hql = "select ... where 'Joye' not member of p.nickName";
+    }
+
+    @Test
+    public void groupby() {
+        String hql;
+        hql = "select ... from Customer group by c.id";
+        hql = "select ... from Customer group by c.id having c.date > 1000";
+    }
+
+    @Test
+    public void orderby() {
+        String hql;
+        hql = "select ... from Customer order by c.id desc ";
+        hql = "select ... from Customer order by c.id null first";
+        hql = "select ... from Customer order by c.id null last";
+    }
+
+    /******************************************************/
     @Before
     public void load() {
         try {

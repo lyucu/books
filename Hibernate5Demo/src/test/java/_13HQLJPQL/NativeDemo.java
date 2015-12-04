@@ -32,6 +32,21 @@ public class NativeDemo {
     }
 
     @Test
+    public void fetchByporfiles() {
+        try (Session session = sessionFactory.openSession()) {
+            Book book = (Book) session.byId(Book.class).load(1l);
+        }
+    }
+
+    @Test
+    public void inesrt() {
+        String hqlInsert = "insert into Book (id) select a.id from Auther a where... ";
+        try (Session session = sessionFactory.openSession()) {
+            session.createQuery(hqlInsert).executeUpdate();
+        }
+    }
+
+    @Test
     public void from() {
         String hql = "select c from Cat cat1";
         hql = "select c from Cat cat1 , Cat cat2";
@@ -116,20 +131,51 @@ public class NativeDemo {
     }
 
     @Test
-    public void fetchByporfiles() {
-        try (Session session = sessionFactory.openSession()) {
-            Book book = (Book) session.byId(Book.class).load(1l);
-        }
+    public void select() {
+        String hql;
+        // instant reutrn not managed
+        hql = "select new Family(mother,mate,offspr) from DoemsticCat as mother";
+        // list
+        hql = "select new list(mother , offspr,mate.name) DoemsticCat as mother ";
+        // map
+        hql = "select new map(mother as mother, offspr as offspr , mate as mate) from ";
+
     }
 
     @Test
-    public void inesrt() {
-        String hqlInsert = "insert into Book (id) select a.id from Auther a where... ";
-        try (Session session = sessionFactory.openSession()) {
-            session.createQuery(hqlInsert).executeUpdate();
-        }
+    public void Predicates() {
+        String hql;
+        hql = "select ... from Customer c where c.startDate < {d '2000-01-01'}";
+        hql = "select ... where type(p) = main";
+        // all or any or some
+        hql = "select ... where p.id > all(select spg.points from statsPerGame spg where spg.player = p)";
+        hql = "select .... where p is null";
+        hql = "select .... where p is not null";
+        hql = "select ... where p like '%123_'";
+        hql = "select ... where p between 0 and 9";
+        hql = "select ... where p in ('TX' , 'OK')";
+        hql = "select ... where p.list is empty";
+        hql = "select ... where p.list is not empty";
+        hql = "select ... where 'Hole' member of p.nickName";
+        hql = "select ... where 'Joye' not member of p.nickName";
     }
 
+    @Test
+    public void groupby() {
+        String hql;
+        hql = "select ... from Customer group by c.id";
+        hql = "select ... from Customer group by c.id having c.date > 1000";
+    }
+
+    @Test
+    public void orderby() {
+        String hql;
+        hql = "select ... from Customer order by c.id desc ";
+        hql = "select ... from Customer order by c.id null first";
+        hql = "select ... from Customer order by c.id null last";
+    }
+
+    /******************************************************/
     @Before
     public void load() {
         try {
