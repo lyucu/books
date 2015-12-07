@@ -1,8 +1,12 @@
 package _13HQLJPQL;
 
+import java.awt.print.Book;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 
 import org.junit.After;
 import org.junit.Before;
@@ -126,6 +130,25 @@ public class JPADemo {
         hql = "select ... from Customer order by c.id desc ";
         hql = "select ... from Customer order by c.id null first";
         hql = "select ... from Customer order by c.id null last";
+    }
+
+    @Test
+    public void query() {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+
+        Query q1 = entityManager.createQuery("123");
+        TypedQuery<Book> q2 = entityManager.createNamedQuery("123", Book.class);
+
+        q1 = entityManager.createQuery("select * from Book b");
+        q2 = entityManager.createNamedQuery("select * from Book b", Book.class);
+
+        // hint
+        // timeOut
+        // fetchgraph
+        // loadgraph
+        q1.setHint("javax.persistence.query.timeout", 2000);
+
     }
 
     /******************************************************/

@@ -1,5 +1,7 @@
 package _13HQLJPQL;
 
+import org.hibernate.CacheMode;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
@@ -173,6 +175,21 @@ public class NativeDemo {
         hql = "select ... from Customer order by c.id desc ";
         hql = "select ... from Customer order by c.id null first";
         hql = "select ... from Customer order by c.id null last";
+    }
+
+    @Test
+    public void query() {
+        try (Session session = sessionFactory.openSession()) {
+            String sql = "update Book b set b.title = :title";
+            session.createQuery(sql).setString("title", "title").executeUpdate();
+
+            Query q1 = session.createQuery("select * from Auther a");
+            // q1 = session.getNamedQuery("123");
+            q1.setTimeout(2);
+            q1.setCacheMode(CacheMode.REFRESH);
+            q1.setCacheable(true);
+            q1.setComment("commet");
+        }
     }
 
     /******************************************************/
