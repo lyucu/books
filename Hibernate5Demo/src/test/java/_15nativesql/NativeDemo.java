@@ -73,6 +73,14 @@ public class NativeDemo {
         }
     }
 
+    @Test
+    public void nameSqlQueries() {
+        // errro
+        try (Session session = sessionFactory.openSession()) {
+            List list = session.getNamedQuery("queryName").setMaxResults(40).list();
+        }
+    }
+
     @Before
     public void load() {
         try {
