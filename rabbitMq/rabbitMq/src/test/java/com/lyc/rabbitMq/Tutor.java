@@ -12,9 +12,12 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Consumer;
+import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.MessageProperties;
+import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.ShutdownSignalException;
 
 public class Tutor extends TestCase {
     private boolean durable = false;
@@ -298,5 +301,76 @@ public class Tutor extends TestCase {
         	Thread.sleep(3000);
        	 	System.out.println(severity);
         }
+    }
+    
+    @Test
+    public void testRPCProducer() throws IOException, TimeoutException, ShutdownSignalException, ConsumerCancelledException, InterruptedException {
+        ConnectionFactory connectionFactory = new ConnectionFactory();
+        connectionFactory.setHost("localhost");
+        Connection connection = connectionFactory.newConnection();
+        Channel channel = connection.createChannel();
+
+        String queueName = channel.queueDeclare().getQueue();
+        QueueingConsumer consumer = new QueueingConsumer(channel);
+        channel.basicConsume(queueName, true, consumer);
+        
+        String corrId = java.util.UUID.randomUUID().toString();
+
+        BasicProperties props = new BasicProperties
+                                    .Builder()
+                                    .correlationId(corrId)
+                                    .replyTo(queueName)
+                                    .build();
+
+        channel.basicPublish("", "demoQueue", props, "hellow".getBytes());
+
+        while (true) {
+        	//consume feedback message
+            QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+            if (delivery.getProperties().getCorrelationId().equals(corrId)) {
+                  System.out.println(new String(delivery.getBody()));;
+                break;
+            }
+        }
+
+        
+        channel.close();
+        connection.close();
+    }
+    
+    
+    @Test
+    public void  testRPCConsumer () throws IOException, TimeoutException, InterruptedException {
+    	ConnectionFactory connectionFactory = new ConnectionFactory();
+        connectionFactory.setHost("localhost");
+        Connection connection = connectionFactory.newConnection();
+        final Channel channel = connection.createChannel();
+        
+        channel.queueDeclare("demoQueue", durable, false, false, null);
+        
+        // 设置consumer能接受的message的数量
+        channel.basicQos(1);
+        
+        QueueingConsumer consumer = new QueueingConsumer(channel);
+        channel.basicConsume("demoQueue", false,consumer);
+        System.out.println("start");
+        
+        while (true) {
+        	//cunsoume received messge
+        	QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+        	BasicProperties props = delivery.getProperties();
+        	BasicProperties replyProps = new BasicProperties
+                    .Builder()
+                    //返回标示的uuid
+                    .correlationId(props.getCorrelationId())
+                    .build();
+        	System.out.println("receive" + new String(delivery.getBody()));
+        	String message = new String(delivery.getBody()) + "resopnse";
+        	//将message 返回指 指定的feedback队列
+        	channel.basicPublish( "", props.getReplyTo(), replyProps, message.getBytes());
+
+            channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+        }
+
     }
 }
