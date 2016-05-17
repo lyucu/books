@@ -1,7 +1,9 @@
 #!/usr/bin/env python3.5
 # -*- coding: utf-8 -*-
 
-' comments '
+' value scope  class private value inherit'
+'object info'
+'class value'
 
 __author__ = 'Markus Liu'
 
@@ -115,6 +117,7 @@ print(getattr(d , 'z' , 'z'))
 print(getattr(d , '__len__'))
 fn = getattr(d , '__len__')
 print(fn())
+
 
 ########### class value
 print('###### class value')

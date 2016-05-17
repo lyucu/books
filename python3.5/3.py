@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.5
 # -*- coding: utf-8 -*-
 
+'function 切片 迭代 列表生成式 生成器'
 def pt(x):
 	if isinstance(x , (int,float)) :
 		print(x)

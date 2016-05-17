@@ -1,7 +1,9 @@
 #!/usr/bin/env python3.5
 # -*- coding: utf-8 -*-
 
-' comments '
+' combine method / __slots__ / @property / multi inherit '
+' classfuntion : iterator get item get attr callable'
+'enum'
 
 __author__ = 'Markus Liu'
 

@@ -1,6 +1,11 @@
 #!/usr/bin/env python3.5
 # -*- coding: utf-8 -*-
 
+'map reduce filter sort'
+'return'
+'lambda'
+'deractor'
+
 ###########function program
 ############map reduce filter sort
 print('#############map reduce')

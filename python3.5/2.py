@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.5
 # -*- coding: utf-8 -*-
-
+'list touple ifelse int loop while dict set'
 #list
 className = ['1','2','3']
 print(className)
@@ -24,6 +24,7 @@ className[0]='update'
 print(className)
 
 #touple
+print('######## touple')
 to = (1,2)
 print(to)
 
