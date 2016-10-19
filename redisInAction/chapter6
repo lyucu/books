@@ -1,0 +1,146 @@
+#!/usr/bin/env python3.5
+# -*- coding: utf-8 -*-
+
+__author__ = 'Markus Liu'
+
+import redis
+import time
+import uuid
+
+
+print('start')
+conn=redis.StrictRedis(host='localhost', port=6379, db=0)
+conn.flushdb()
+
+def acquire_loc(conn, lockName , time_out = 2) :
+	id = str(uuid.uuid4())
+	endtime = time.time() + time_out
+	while time.time() < endtime:
+		if conn.setnx('lock' + lockName , id) :
+			return id
+	return False		
+
+
+def release_loc(conn, lockName, id) :
+	pipe = conn.pipeline(True)
+	lockName = 'lock' + lockName
+	while True:
+		try:
+			pipe.watch(lockName)
+			if pipe.get(lockName).decode('ascii') == id :
+				pipe.multi()
+				pipe.delete(lockName)
+				pipe.execute()
+				return True
+			pipe.unwatch()
+			break
+		except redis.exceptions.WatchError:
+			pass		
+	return False		
+
+def acquireLocWithTimeout(conn, lockName , timeOut = 2, lockTimeOut = 60) :
+	id = str(uuid.uuid4())
+	lockName = 'lock' + lockName
+	endtime = time.time() + timeOut
+	while time.time() < endtime:
+		if conn.setnx(lockName , id) :
+			conn.expire(lockName , lockTimeOut)
+			return id
+		elif  not conn.ttl(lockName) :
+			conn.expire(lockName , lockTimeOut)
+	return False
+
+
+def acquireSemaphore(conn, semname, limit, timeOut=10) :
+	id = str(uuid.uuid4())
+	now = time.time()
+
+	pipeline = conn.pipeline(True)
+	pipeline.zremrangebyscore(semname, '-inf' , now-timeOut)
+	pipeline.zadd(semname,now,id)
+	pipeline.zrank(semname, id)
+	if(pipeline.execute()[-1] < limit):
+		return id
+	conn.zrem(semname. id)
+	return None	
+
+def releaseSemaphore(conn, semanme,id) :
+	return conn.zrem(semanme,id)
+
+def sendToQueue(conn, ) :
+	conn.rpush('queue' , 1)	
+
+def processQueue(conn) :
+	return conn.lpop('queue')	
+
+def createChat(conn , sender , recipients ) :
+	chatId = conn.incr('id:chat:')
+	recipients.append(sender)
+	recipientsd = dict((r,0) for r in recipients)
+	pipeline = conn.pipeline(True)
+	pipeline.zadd('chat:'+ str(chatId),**recipientsd)
+	for rec in recipients:
+		pipeline.zadd('seen:' + rec , 0,chatId)
+	pipeline.execute()
+	
+def sendChat(conn , chatId , sender , message) :
+	id = acquire_loc(conn,'chat:' + str(chatId))
+	if not id :
+		raise Exception()
+	try :
+		mid = conn.incr('ids:' + str(chatId))
+		ts = time.time()
+		conn.zadd('msg:' + str(chatId) , mid,message)
+	finally :
+		release_loc(conn, 'chat:' + str(chatId),id)
+
+def getChat(conn, recipient) :
+		seen = conn.zrange('seen:' + recipient,0,-1,withscores=True)
+		pipeline = conn.pipeline(True)
+		print(seen)
+		for chatId ,seenId in seen :
+			pipeline.zremrangebyscore('msg:' + str(chatId), seenId + 1, 'inf')
+			chatInfo = pipeline.execute();
+		
+def joinChat(conn,chatId,user) :
+	messageId = int(conn.get('ids:' + str(chatId)))
+	pipeline = conn.pipeline(True)
+	pipeline.zadd('chat:' + str(chatId) , messageId,user )
+	pipeline.zadd('seen:' + user ,messageId, chatId  )
+	pipeline.execute()
+
+def leaveChat(conn , chatId , user) :
+	pipeline = conn.pipeline(True)
+	pipeline.zrem('chat:' + str(chatId) , user)
+	pipeline.zrem('seen:' + user , chatId)
+	pipeline.zcard('chat:' + chatId)
+	pipeline.execute()
+
+
+
+
+print('****************lock')
+id = acquire_loc(conn , 'lc' )
+print(id)	
+id1 = acquire_loc(conn , 'lc' )
+print(id1)
+release_loc(conn , 'lc', id)
+id = acquireLocWithTimeout(conn , 'lyc')
+print(id)
+
+print('****************sem')
+id = acquireSemaphore(conn, 'semname1' , 5)
+print(id)
+releaseSemaphore(conn, 'semname1',id)
+
+print('****************queue')
+sendToQueue(conn)
+processQueue(conn)
+
+print('****************message pull')
+createChat(conn , 'lyc1' , ['lyc2','lyc3'])
+sendChat(conn , 1, 'lyc1' , 'hello world')
+getChat(conn, 'lyc2')
+joinChat(conn, 1, 'lyc4')
+leaveChat(conn,1,'lyc4')
+print('finish')

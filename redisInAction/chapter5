@@ -1,0 +1,37 @@
+#!/usr/bin/env python3.5
+# -*- coding: utf-8 -*-
+
+__author__ = 'Markus Liu'
+
+import redis
+import time
+
+print('start')
+conn=redis.StrictRedis(host='localhost', port=6379, db=0)
+conn.flushdb()
+
+PRESCISION = [1 , 5 , 60 , 300 , 3600 ]
+
+def update_counter(conn, name, count = 1, now = None) :
+	now = now or time.time()
+	pipe = conn.pipeline()
+	for pres in PRESCISION :
+		pnow = int(now / pres) * pres
+		hash = '%s:%s'%(pres , name)
+		pipe.zadd('known', 0 , hash)
+		pipe.hincrby('count:' + hash , pnow , count)
+	pipe.execute()
+
+def get_count(conn, name, precisiion) :
+	hash = '%s:%s'%(precisiion , name)
+	date = conn.hgetall('count:' + hash)
+	print(date)
+	to_return = []
+	for key, value in date.items():
+		to_return.append((int(key) , int(value)))
+	to_return.sort()
+	return to_return
+
+
+update_counter(conn , 'lyc',1)
+get_count(conn , 'lyc' , 300)
